@@ -1,11 +1,15 @@
 package dartgen
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
+	"github.com/zeromicro/go-zero/tools/goctl/pkg/golang"
+	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
 	"os"
 	"path"
 	"strings"
+	"text/template"
 
 	"github.com/zeromicro/go-zero/tools/goctl/api/spec"
 	"github.com/zeromicro/go-zero/tools/goctl/api/util"
@@ -16,6 +20,54 @@ const (
 	pathTagKey   = "path"
 	headerTagKey = "header"
 )
+
+type fileGenConfig struct {
+	dir             string
+	subdir          string
+	filename        string
+	templateName    string
+	category        string
+	templateFile    string
+	builtinTemplate string
+	data            any
+}
+
+func genFile(c fileGenConfig, fm template.FuncMap) error {
+	fp, created, err := util.MaybeCreateFile(c.dir, c.subdir, c.filename)
+	if err != nil {
+		return err
+	}
+	if !created {
+		return nil
+	}
+	defer fp.Close()
+
+	// 获取模板名称？还是说是获取模板？
+	var text string
+	if len(c.category) == 0 || len(c.templateFile) == 0 {
+		text = c.builtinTemplate
+	} else {
+		text, err = pathx.LoadTemplate(c.category, c.templateFile, c.builtinTemplate)
+		if err != nil {
+			return err
+		}
+	}
+	// 生成模板
+	t := template.Must(template.New(c.templateName).Parse(text))
+	t = t.Funcs(fm)
+	// 字节流
+	buffer := new(bytes.Buffer)
+	// 填充数据
+	err = t.Execute(buffer, c.data)
+	if err != nil {
+		return err
+	}
+	// 格式化代码
+	code := golang.FormatCode(buffer.String())
+	// 写入文件
+	_, err = fp.WriteString(code)
+	return err
+}
 
 func normalizeHandlerName(handlerName string) string {
 	handler := strings.Replace(handlerName, "Handler", "", 1)

@@ -3,6 +3,7 @@ package dartgen
 import (
 	"errors"
 	"fmt"
+	"github.com/zeromicro/go-zero/tools/goctl/config"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -27,7 +28,7 @@ var (
 func DartCommand(_ *cobra.Command, _ []string) error {
 	apiFile := VarStringAPI
 	dir := VarStringDir
-	isLegacy := VarStringLegacy
+	//isLegacy := VarStringLegacy
 	hostname := VarStringHostname
 	scheme := VarStringScheme
 	if len(apiFile) == 0 {
@@ -44,7 +45,7 @@ func DartCommand(_ *cobra.Command, _ []string) error {
 		fmt.Println("you could use '-scheme' flag to specify your server scheme")
 		scheme = "http"
 	}
-
+	cfg, err := config.NewConfig("goZero")
 	api, err := parser.Parse(apiFile)
 	if err != nil {
 		return err
@@ -59,9 +60,9 @@ func DartCommand(_ *cobra.Command, _ []string) error {
 		dir = dir + "/"
 	}
 	api.Info.Title = strings.Replace(apiFile, ".api", "", -1)
-	logx.Must(genData(dir+"data/", api, isLegacy))
-	logx.Must(genApi(dir+"api/", api, isLegacy))
-	logx.Must(genVars(dir+"vars/", isLegacy, scheme, hostname))
+	logx.Must(genData(dir+"data/", cfg, api))
+	//logx.Must(genApi(dir+"api/", api, isLegacy))
+	//logx.Must(genVars(dir+"vars/", isLegacy, scheme, hostname))
 	if err := formatDir(dir); err != nil {
 		logx.Errorf("failed to format, %v", err)
 	}
