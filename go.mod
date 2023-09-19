@@ -1,4 +1,4 @@
-module github.com/zeromicro/go-zero
+module github.com/baiye1111/go-zero
 
 go 1.18
 
@@ -20,6 +20,7 @@ require (
 	github.com/prometheus/client_golang v1.16.0
 	github.com/spaolacci/murmur3 v1.1.0
 	github.com/stretchr/testify v1.8.4
+	github.com/zeromicro/go-zero v1.5.5
 	go.etcd.io/etcd/api/v3 v3.5.9
 	go.etcd.io/etcd/client/v3 v3.5.9
 	go.mongodb.org/mongo-driver v1.12.1
